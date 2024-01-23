@@ -1,0 +1,56 @@
+Eric Wnorowski
+Professor Marc Smith
+CS377 Parallel Programming
+Assign 3: Dining UPC Philosophers
+
+    This marks our second UPC-focused assignment of the semester, and for me progress
+was continued to be made. Obviously we were introduced to the problem in class, which
+allowed me to gain a baseline understanding of the starter code. During the previous
+assignment I had tried to start by just jumping into the code, but found myself losing
+track of what the program was really doing. So I decided to change my approach to this
+assignment and begin with trying to gain a better understanding for the problem and 
+the solution. Our work with semaphores in the Ben-Ari text gave me familiarity with the
+theoretical Dining Philosophers. However I wanted to understand it within the context of
+UPC, so I turned towards our textbook and the UPC documentation. The text discusses the
+dining philosophers problem at length and demonstrates the various locking techniques
+that cen be used to offer alternate solutions to the problem. Our solution calls for a switch
+from upc_lock_attempt() to upc_lock() which means introducing the possibility for deadlock.
+However, upc_lock_attempt() tries to lock a shared variable using a pointer to the variable,
+meaning that it is checking to see if a lock is available. Which introduces the issue of 
+busy-waiting because the threads will keep checking for availbility if denied. This 
+foundational knowledge made me feel prepared to begin working through our specific 
+problem and start coding.
+
+    Unlike last assignment when I got to coding I was no longer lost, I understood exactly
+the kind of changes that would be needed to adjust from the starter code to the different solutions.
+The most differentiating part is that upc_lock() will not require a boolean if statement to
+ensure that locking is done properly. Of course this introduces the possibility for deadlock.
+This is because upc_lock is not checking for the availbility for locks, like upc_lock_attempt(),
+instead if there is a lock available it will take it and run the program. In the Dining Philosophers
+problem presents and issue because upc_lock is used to pick up one fork, and the other could be
+locked (causing deadlock). Therefore we must manipulate the starter code to prevent deadlock.
+Each of the first two versions are manipulating the order that a philosopher picks up their 
+untensils in order to prevent deadlock. This is achieved by manipulating the order based
+upon the thread that the philosopher is running on. 
+	The final version attempts a different strategy by introducing a waiter (and two new states) 
+to only ever allow 4 philosophers to even sit at the table, meaning one philosopher is left standing 
+while the others eat a meal. However this does not mean that a philosopher gets to sit down and enjoy 
+twenty meals, ratherafter eating one meal they are to stand up. Therefore they have to wait again 
+until a seat opens up before eating another meal. This solution introduces the possibility of
+busy-waiting, and as the homework states determining a non-busy-waiting version alluded me.
+I tried multiple different possible techniques to create a "waiter" that would only
+allow 4 philosophers a seat at one time. At first I was running into deadlock issues, unlike
+the previous two excercises which I managed to get right without too many mistakes. However,
+now that the order of forks was not being manipulated but rather the entirety of the
+workflow would be altered. I did have a solution that did not seem to deadlock but the
+programs busy-waiting made the philosophers eat very slowly. This was the most challenging part 
+of the assignment, and I am not convinced there is a non-busy waiting solution. I thought
+through multiple different workflows to try to minimize the waiting, yet any which way
+I thought to manipulate it seemed that there would always be busy waiting. For example,
+one of the processes I imagined were if it were possible for it to be the waiter to 
+be doing the busy waiting. What I mean by that is that as soon as a philosopher is finished with
+their meal, could the waiter seat a standing philosopher. My first try had the philosophers
+waiting on the waiter for approval. However, even in my "new" solution I realized that although
+the busy-waiting may be minimized, ultimately the waiter would still be busy-waiting for
+a philosopher to stand up. So I am not convinced there is a UPC non-busy-waiting solution,
+but I certainly would love to know the key to success.
